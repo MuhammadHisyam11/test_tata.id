@@ -58,12 +58,13 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--canvas); color: var(--ink); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+/* Spasi bawaan Plus Jakarta Sans sangat sempit sehingga kata terlihat menempel ("Perlutindakan"); diperlebar sedikit. */
+body { margin: 0; background: var(--canvas); color: var(--ink); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; word-spacing: 0.1em; }
 h1, h2, h3, h4, p, dl, dd { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 a { color: inherit; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
-code, pre { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12.5px; }
+code, pre { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12.5px; word-spacing: normal; }
 pre { overflow-x: auto; margin: 8px 0 0; padding: 10px 12px; background: var(--soft); border: 1px solid var(--rule);
   border-radius: 6px; color: var(--ink-2); white-space: pre-wrap; word-break: break-word; }
 mark { background: var(--mark); color: inherit; padding: 0 2px; border-radius: 2px; }
