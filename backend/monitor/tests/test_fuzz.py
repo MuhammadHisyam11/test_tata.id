@@ -65,6 +65,10 @@ class FuzzTests(SimpleTestCase):
                 concl = assess.conclusion(metrics["attention"], findings)  # tidak boleh crash
                 self.assertTrue(concl["text"])
                 self.assertNotIn("None", concl["text"] + concl["first_step"])
+                obs, target = metrics["observed_actual"], p["target"]
+                if p["reported_status"] == "COMPLETED" and obs is not None and target and obs < target * 0.95:
+                    # Klaim "selesai" padahal data sistem jauh di bawah target tidak boleh berstatus "Aman".
+                    self.assertEqual(metrics["attention"], "HIGH")
                 late = metrics["forecast_delay_days"] is not None and metrics["forecast_delay_days"] > 0
                 if late and p["reported_status"] != "COMPLETED":
                     # Kolom "N hari terlambat" tidak boleh berdampingan dengan status "Aman":

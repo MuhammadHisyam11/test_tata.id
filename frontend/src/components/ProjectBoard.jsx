@@ -57,7 +57,8 @@ function Kpis({ projects }) {
 
 /** "Perlu tindakan hari ini": yang paling penting terbaca sebelum tabel. */
 function Today({ projects }) {
-  const urgent = projects.filter((p) => p.is_active && p.attention === 'HIGH')
+  // Termasuk project berstatus selesai: klaim "selesai" yang tidak didukung data juga perlu tindakan.
+  const urgent = projects.filter((p) => p.attention === 'HIGH')
   return (
     <section className={`card today ${urgent.length ? '' : 'today-clear'}`} aria-labelledby="today-title">
       <h2 id="today-title" className="card-title">

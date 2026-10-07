@@ -206,7 +206,7 @@ Record yang mencantumkan `unit` berbeda dari `project.target_unit` **diabaikan**
 
 ## 6. Rule Engine
 
-`monitor/assess.py` berisi fungsi-fungsi `rule_x(ctx) -> list[Finding]` (`ctx` = dataclass berisi project, updates, records, metrics, as_of). Meta-rule menerima `(ctx, findings)`. Semua rule adalah pure function sehingga mudah di-test. Threshold dikumpulkan sebagai konstanta di atas file. Rule hanya berjalan untuk project aktif (`reported_status != COMPLETED`), kecuali `POST_GO_LIVE_HEALTH`.
+`monitor/assess.py` berisi fungsi-fungsi `rule_x(ctx) -> list[Finding]` (`ctx` = dataclass berisi project, updates, records, metrics, as_of). Meta-rule menerima `(ctx, findings)`. Semua rule adalah pure function sehingga mudah di-test. Threshold dikumpulkan sebagai konstanta di atas file. Rule hanya berjalan untuk project aktif (`reported_status != COMPLETED`), kecuali `POST_GO_LIVE_HEALTH` dan `COMPLETION_NOT_SUPPORTED` yang khusus untuk project selesai.
 
 | Rule | Kondisi | Severity | Evidence |
 |---|---|---|---|
@@ -221,10 +221,11 @@ Record yang mencantumkan `unit` berbeda dari `project.target_unit` **diabaikan**
 | `DATA_QUALITY_SKIP` | `records_skipped_* > 0` pada **snapshot terbaru** per field (bukan setiap snapshot historis) | MEDIUM | quality record + update yang menyebut "dilewati" |
 | `STALE_REPORT` | `AS_OF - last_activity_at > 3 hari` | MEDIUM | master + update terakhir + record terakhir |
 | `STATUS_CONTRADICTION` | `reported_status == ON TRACK` dan ada finding HIGH | HIGH | master + evidence dari finding HIGH |
+| `COMPLETION_NOT_SUPPORTED` | COMPLETED, tetapi `(target - observed_actual) / target > 1%`: klaim "selesai" tidak didukung data sistem | MEDIUM; HIGH bila > 5% | master + record observed |
 | `POST_GO_LIVE_HEALTH` | COMPLETED: `application_status != ONLINE` → MEDIUM; `failed/(success+failed) > 10%` → MEDIUM; selain itu INFO ringkasan kesehatan | INFO/MEDIUM | usage record |
 | `INSUFFICIENT_DATA` | proyek aktif dengan `target` kosong, **atau** unit punya mapping observed tetapi tidak ada record sistem (ber-unit sama) | **LOW** ("Perhatikan" — tanpa data, sistem tidak bisa menyatakan aman) | master |
 
-Total **13 rule**: 10 rule biasa + 2 meta-rule untuk project aktif, dan `POST_GO_LIVE_HEALTH` untuk project selesai.
+Total **14 rule**: 10 rule biasa + 2 meta-rule untuk project aktif, dan `COMPLETION_NOT_SUPPORTED` + `POST_GO_LIVE_HEALTH` untuk project selesai. `COMPLETION_NOT_SUPPORTED` hanya berlaku bila unit punya mapping observed (bukan `system`), jadi PRJ-006 tidak terpengaruh.
 
 **Detail rule:**
 - **`REPORTED_VS_OBSERVED`:**
@@ -237,7 +238,7 @@ Total **13 rule**: 10 rule biasa + 2 meta-rule untuk project aktif, dan `POST_GO
 - **Blocker aktif** = finding `ENV_NOT_READY`, atau `EQUIPMENT_DEGRADED` dengan severity HIGH. **Hanya sinyal terstruktur.** Teks bebas tidak pernah menjadi blocker.
 - **Attention level** = severity tertinggi dari findings (hanya INFO atau tidak ada findings → `OK`).
 - **Urutan daftar** (per seksi Aktif/Selesai): `(attention, jumlah HIGH desc, days_remaining asc)`, lalu `project_id` sebagai pemecah seri.
-- **Urutan findings dalam satu project:** `finding_order()` = severity, lalu `RULE_ORDER`: `REPORTED_VS_OBSERVED`, `PACE_RISK`, `OVERDUE`, `ENV_NOT_READY`, `DEADLINE_IMMINENT_BLOCKED`, `STALE_REPORT`, `EQUIPMENT_DEGRADED`, `DATA_QUALITY_SKIP`, `SCOPE_GAP`, `PCT_INCONSISTENT`, `STATUS_CONTRADICTION`, `POST_GO_LIVE_HEALTH`, `INSUFFICIENT_DATA` (rule tak dikenal di akhir). Dipakai di `assess.py` dan `views.py`. Finding teratas menjadi "Masalah utama" di papan — mis. PRJ-003 menampilkan "seharusnya sudah selesai, tidak ada kabar" alih-alih "persentase tidak cocok".
+- **Urutan findings dalam satu project:** `finding_order()` = severity, lalu `RULE_ORDER`: `COMPLETION_NOT_SUPPORTED`, `REPORTED_VS_OBSERVED`, `PACE_RISK`, `OVERDUE`, `ENV_NOT_READY`, `DEADLINE_IMMINENT_BLOCKED`, `STALE_REPORT`, `EQUIPMENT_DEGRADED`, `DATA_QUALITY_SKIP`, `SCOPE_GAP`, `PCT_INCONSISTENT`, `STATUS_CONTRADICTION`, `POST_GO_LIVE_HEALTH`, `INSUFFICIENT_DATA` (rule tak dikenal di akhir). Dipakai di `assess.py` dan `views.py`. Finding teratas menjadi "Masalah utama" di papan — mis. PRJ-003 menampilkan "seharusnya sudah selesai, tidak ada kabar" alih-alih "persentase tidak cocok".
 
 ### Text signals (FR-8)
 
@@ -441,12 +442,12 @@ Setiap bagian adalah kartu.
   - ingest idempotent, dan data sumber rusak menghasilkan `CommandError` tanpa mengubah data lama;
   - bahasa awam (`PlainLanguageTests`): perkiraan per project, `summary`/`verify`/`follow_up` bebas jargon (regex `JARGON`: snake_case, ID, kode status kapital, dan kata teknis *production / go-live / environment / deployment / snapshot*), headline papan, kalimat kunci.
 
-- `test_fuzz.py` — 500 project acak (seed 42) dengan field kosong, unit berbeda, angka ekstrem, dan semua tipe record: tidak boleh crash; setiap finding punya `summary` tanpa "None" dan evidence yang valid; perkiraan terlambat ⇒ ada `PACE_RISK`/`OVERDUE` dan status bukan "Aman". Saat audit juga dijalankan dengan 10.000 project tanpa crash.
+- `test_fuzz.py` — 500 project acak (seed 42) dengan field kosong, unit berbeda, angka ekstrem, dan semua tipe record: tidak boleh crash; setiap finding punya `summary` tanpa "None" dan evidence yang valid; perkiraan terlambat ⇒ ada `PACE_RISK`/`OVERDUE` dan status bukan "Aman"; project COMPLETED dengan data sistem < 95% target ⇒ HIGH. Saat audit juga dijalankan dengan 10.000 project tanpa crash.
 - Audit putaran 3 juga menambahkan: list endpoint tetap 2 query dengan 100 project, id tidak valid → 404, dan perkiraan absurd tidak crash.
 
 - Fase 8a: `conclusion` per project (pembuka, langkah pertama, bebas jargon), dan fuzz memastikan `conclusion` tidak crash dan tanpa "None".
 
-Total **47 test** (29 di `test_assess.py`, 17 di `test_api.py`, 1 di `test_fuzz.py` yang memeriksa 500 project).
+Total **49 test** (31 di `test_assess.py`, 17 di `test_api.py`, 1 di `test_fuzz.py` yang memeriksa 500 project).
 
 **Frontend:** `npm run build` + `npm run lint` harus bersih, ditambah checklist di Implementation Plan Fase 5 dan 7b (dijalankan dengan headless browser selama pengembangan; script-nya tidak disertakan).
 

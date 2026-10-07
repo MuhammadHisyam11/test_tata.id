@@ -226,7 +226,7 @@ Hasil review user: UI terasa tidak profesional; diminta tampil seperti dashboard
 
 ### Audit pasca-Fase 9
 - [x] Backend: 47 test hijau, `check` & `makemigrations --check` bersih, pip-audit & npm audit 0 kerentanan. Probe API: ID tidak valid/NUL/500 karakter/path traversal → 404, Host asing → 400, POST ditolak (403 CSRF), header keamanan ada.
-- [x] Dicek: KPI *Perlu tindakan* tidak bisa berbeda dari daftar *Perlu tindakan hari ini*, karena project selesai paling tinggi MEDIUM (`rule_post_go_live_health`).
+- [x] Dicek: KPI *Perlu tindakan* tidak bisa berbeda dari daftar *Perlu tindakan hari ini*, karena project selesai paling tinggi MEDIUM (`rule_post_go_live_health`). *(Tidak berlaku lagi sejak aturan `COMPLETION_NOT_SUPPORTED`; daftar kini mencakup project selesai, lihat bagian berikutnya.)*
 - [x] **Bug: tooltip "?" terpotong/tertutup di 10 tempat**, termasuk menyebabkan scroll horizontal di detail 1360px. Penyebab: kartu tabel `overflow: hidden`, tooltip selalu rata kiri tombol, dan tidak ada pengecekan jarak ke bawah layar. Perbaikan: posisi `fixed` dihitung dari tombol dan dijepit di dalam layar. Probe baru membuka **36 tooltip** di 4 lebar layar × 3 halaman dan memeriksa keempat sudutnya terlihat: 0 gagal.
 - [x] **A11y: perlu 9× Tab untuk melewati sidebar.** Ditambah tombol *Lewati ke konten* (WCAG 2.4.1).
 - **Hasil:** 34/34 pengecekan UI tetap lulus, build + lint bersih.
@@ -252,6 +252,16 @@ Brief, Data Dictionary, dan Submission Guide dibaca ulang dan dicocokkan dengan 
 - [x] Git sudah di-`init`, **belum ada commit dan belum ada remote**. File yang akan masuk commit dicek: 52 file, tanpa `.venv`, `node_modules`, `.env`, build output, atau folder `requirements/`.
 - **Hasil:** 47 test backend, 41/41 UI, 36/36 tooltip, build + lint bersih.
 - **Sisa yang harus diisi user sendiri:** sudah diisi (TODO di `AI_USAGE.md` §4–§6 dan waktu kerja di README). Tinggal commit + akses repo untuk evaluator.
+
+## Perbaikan celah: klaim "selesai" tanpa dukungan data
+
+Ditemukan saat uji coba skenario manual: mengubah status PRJ-002 menjadi `COMPLETED` membuat project yang di sistem baru 72,7% dinilai **OK tanpa temuan**, karena project selesai hanya menjalankan `POST_GO_LIVE_HEALTH`. Padahal klaim "selesai" yang tidak didukung data adalah inti tantangan.
+
+- [x] Test ditulis dulu dan dibuktikan gagal (12 kegagalan): `test_completed_but_system_far_below_target_is_high`, `test_completed_thresholds` (batas 1%/5% sama dengan `REPORTED_VS_OBSERVED`), dan invariant fuzz "COMPLETED dengan data sistem < 95% target ⇒ HIGH".
+- [x] Aturan baru `COMPLETION_NOT_SUPPORTED` (MEDIUM > 1%, HIGH > 5% kekurangan terhadap target), dijalankan untuk project COMPLETED bersama `POST_GO_LIVE_HEALTH`. Unit tanpa mapping observed (`system`) tidak terpengaruh, jadi hasil dataset asli tidak berubah.
+- [x] Frontend: *Perlu tindakan hari ini* kini mencakup project berstatus selesai yang HIGH, supaya konsisten dengan kartu KPI.
+- [x] Dicek di UI dengan data skenario: Kesimpulan "Dilaporkan selesai, tetapi baru 72.7% yang tercatat di mesin scanner (87,240 dari 120,000 halaman)", kalimat awam bebas jargon.
+- **Hasil:** 49 test backend, 41/41 UI, 36/36 tooltip, build + lint bersih; hasil 6 project di dataset asli tidak berubah.
 
 ## Rencana Potong Jika Waktu Habis
 

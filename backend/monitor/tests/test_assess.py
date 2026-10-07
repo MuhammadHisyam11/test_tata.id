@@ -152,13 +152,32 @@ class StatusRuleTests(SimpleTestCase):
         f = assess.rule_overdue(ctx(project(deadline=date(2026, 10, 1))))
         self.assertEqual(f[0].severity, "HIGH")
 
-    def test_completed_project_only_gets_health_check(self):
+    def test_completed_project_skips_active_rules(self):
         p = project(reported_status="COMPLETED", deadline=date(2026, 9, 1))  # overdue diabaikan
         rec = record("R1", AS_OF, "usage_snapshot", application_status="ONLINE",
                      successful_logins_last_24h=21, failed_logins_last_24h=1, active_users_last_24h=14)
         metrics, findings = assess.assess_project(p, [], [rec], AS_OF)
         self.assertEqual([f.rule for f in findings], ["POST_GO_LIVE_HEALTH"])
         self.assertEqual(metrics["attention"], "OK")
+
+    def test_completed_but_system_far_below_target_is_high(self):
+        """Klaim "selesai" yang tidak didukung data sistem (PRJ-002 jika diubah ke COMPLETED: 72.7%)."""
+        p = project(reported_status="COMPLETED", target=120000.0, target_unit="pages",
+                    reported_actual=120000.0, reported_progress_pct=100.0)
+        metrics, findings = assess.assess_project(p, [], [record("R1", AS_OF, pages_processed_total=87240)], AS_OF)
+        self.assertEqual([f.rule for f in findings], ["COMPLETION_NOT_SUPPORTED"])
+        self.assertEqual(findings[0].severity, "HIGH")
+        self.assertIn("72.7%", findings[0].summary)
+        self.assertEqual(metrics["attention"], "HIGH")
+
+    def test_completed_thresholds(self):
+        # target 400 ML: selisih <= 1% target diabaikan, > 1% MEDIUM, > 5% HIGH; melampaui target juga aman.
+        for observed, expected in ((420, None), (400, None), (397, None), (390, "MEDIUM"), (370, "HIGH")):
+            with self.subTest(observed=observed):
+                p = project(reported_status="COMPLETED", reported_actual=400.0, reported_progress_pct=100.0)
+                _, findings = assess.assess_project(p, [], [record("R1", AS_OF, verified_quantity=observed)], AS_OF)
+                got = [f.severity for f in findings if f.rule == "COMPLETION_NOT_SUPPORTED"]
+                self.assertEqual(got, [expected] if expected else [])
 
     def test_status_contradiction_only_for_on_track(self):
         high = [assess.Finding("X", "HIGH", "SCHEDULE", "x", evidence=[])]

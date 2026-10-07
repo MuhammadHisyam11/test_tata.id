@@ -32,7 +32,7 @@ SEVERITY_RANK = {"HIGH": 3, "MEDIUM": 2, "LOW": 1, "INFO": 0}
 # Urutan tampil untuk severity yang sama: temuan paling informatif bagi management lebih dulu
 # (temuan teratas menjadi "Masalah utama" di papan).
 RULE_ORDER = [
-    "REPORTED_VS_OBSERVED", "PACE_RISK", "OVERDUE", "ENV_NOT_READY", "DEADLINE_IMMINENT_BLOCKED",
+    "COMPLETION_NOT_SUPPORTED", "REPORTED_VS_OBSERVED", "PACE_RISK", "OVERDUE", "ENV_NOT_READY", "DEADLINE_IMMINENT_BLOCKED",
     "STALE_REPORT", "EQUIPMENT_DEGRADED", "DATA_QUALITY_SKIP", "SCOPE_GAP", "PCT_INCONSISTENT",
     "STATUS_CONTRADICTION", "POST_GO_LIVE_HEALTH", "INSUFFICIENT_DATA",
 ]
@@ -511,6 +511,33 @@ def rule_post_go_live_health(c):
     )]
 
 
+def rule_completion_not_supported(c):
+    """Project dilaporkan COMPLETED, tetapi data sistem masih jauh di bawah target."""
+    p, m = c.project, c.metrics
+    obs, target = m["observed_actual"], p["target"]
+    if obs is None or not target:
+        return []
+    gap = target - obs
+    rel = gap / target
+    if rel <= MISMATCH_MEDIUM:
+        return []
+    unit = p["target_unit"]
+    u_plain, label = unit_plain(unit), OBSERVED_PLAIN.get(unit, "tercatat di sistem")
+    obs_rec = next(r for r in c.records if r["source_record_id"] == m["observed_source_id"])
+    return [Finding(
+        "COMPLETION_NOT_SUPPORTED", "HIGH" if rel > MISMATCH_HIGH else "MEDIUM", "DATA_MISMATCH",
+        f"Master berstatus COMPLETED, tetapi {obs_rec['source_system']} mencatat {m['observed_field']} = {fmt_num(obs)} {unit} "
+        f"(snapshot {fmt_dt(m['observed_at'])}) = {m['observed_pct']:.1f}% dari target {fmt_num(target)} {unit}. "
+        f"Kurang {fmt_num(gap)} {unit} ({rel:.1%} dari target).",
+        summary=f"Dilaporkan selesai, tetapi baru {m['observed_pct']:.1f}% yang {label} "
+                f"({fmt_num(obs)} dari {fmt_num(target)} {u_plain}).",
+        verify=f"Apakah {fmt_num(gap)} {u_plain} sisanya sudah dikerjakan tetapi belum tercatat di sistem, "
+               "atau project ditutup sebelum target tercapai?",
+        follow_up=f"Minta {p['pic']} bukti penyelesaian, atau kembalikan status project menjadi belum selesai.",
+        evidence=[master_ev(p), rec_ev(obs_rec)],
+    )]
+
+
 def rule_insufficient_data(c):
     """LOW, bukan INFO: tanpa data, sistem tidak bisa menyatakan project aman."""
     p, m = c.project, c.metrics
@@ -583,7 +610,8 @@ def assess_project(project, updates, records, as_of):
     metrics = compute_metrics(project, updates, records, as_of)
     c = Ctx(project, updates, records, metrics, as_of)
     if project["reported_status"] == "COMPLETED":
-        findings = rule_post_go_live_health(c)
+        # Aturan jadwal/progres tidak relevan lagi, tetapi klaim "selesai" tetap dicocokkan dengan data sistem.
+        findings = rule_completion_not_supported(c) + rule_post_go_live_health(c)
     else:
         findings = [f for rule in ACTIVE_RULES for f in rule(c)]
         for meta in META_RULES:

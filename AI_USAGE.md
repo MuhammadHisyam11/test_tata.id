@@ -20,7 +20,7 @@ Secara jujur: **sebagian besar kode dan dokumen dihasilkan oleh AI.** Peran saya
 |---|---|
 | Dokumen perencanaan | `docs/PRD.md`, `docs/TECH_SPEC.md`, `docs/IMPLEMENTATION_PLAN.md` |
 | Setup & ingest | `backend/config/settings.py` (penyesuaian), `monitor/models.py`, `monitor/admin.py`, `monitor/management/commands/ingest.py` |
-| Rule engine | `monitor/assess.py` (metrik, 13 rule, text signals, kalimat awam, perkiraan selesai, kesimpulan), `monitor/services.py` |
+| Rule engine | `monitor/assess.py` (metrik, 14 rule, text signals, kalimat awam, perkiraan selesai, kesimpulan), `monitor/services.py` |
 | API | `monitor/views.py`, `monitor/urls.py`, `config/urls.py` |
 | Test | `monitor/tests/test_assess.py`, `monitor/tests/test_api.py`, `monitor/tests/test_fuzz.py` |
 | Frontend | `frontend/src/**` (dari template Vite React; boilerplate dihapus; didesain ulang di Fase 7b, 8b, dan 9 atas permintaan saya) |
@@ -58,6 +58,7 @@ Verifikasi yang dilakukan, dan apa yang ditemukan:
 - **Fase 9 (tampilan dashboard):** dari review screenshot, kolom "Masalah utama" terpotong di layar 1360px setelah sidebar ditambahkan. Pengecekan keyboard juga menangkap bug CSS dari Fase 8b yang sebelumnya lolos: selector `.board-head span:last-child` ikut menyembunyikan tombol "?" di header tabel pada lebar 680–1100px. Pengecekan Fase 8b tidak menangkapnya karena hanya menguji keyboard di 1360px. Keduanya diperbaiki.
 - **Audit pasca-Fase 9:** tooltip "?" ternyata terpotong atau keluar layar di 10 tempat. Ini lolos dari semua pengecekan sebelumnya karena tes hanya memastikan tooltip *ada* di DOM, bukan *terlihat*. Tes baru memeriksa keempat sudut tooltip benar-benar terlihat di layar. Ditambah tombol *Lewati ke konten* untuk pengguna keyboard.
 - **Cek ulang terhadap requirements:** ditemukan kata "production" yang lolos di teks *Perlu dikonfirmasi* PRJ-005, serta label teknis di riwayat aktivitas. Ini lolos karena test jargon buatan AI hanya mencari kode dan huruf kapital, tidak mencari kata teknis biasa. Test diperluas, dibuktikan gagal dulu, lalu teksnya diperbaiki.
+- **Uji coba skenario manual:** saat saya mencoba mengubah status PRJ-002 menjadi `COMPLETED`, project yang di sistem baru 72,7% langsung dinilai "Aman" tanpa temuan apa pun, karena project selesai hanya dicek kesehatannya. Celah ini tidak terlihat di dataset asli maupun fuzz test, karena fuzz test hanya memastikan tidak crash. Ditambahkan aturan `COMPLETION_NOT_SUPPORTED` dan invariant fuzz baru; test dibuktikan gagal dulu (12 kegagalan), lalu kode diperbaiki.
 
 **Cara saya mereview:**
 

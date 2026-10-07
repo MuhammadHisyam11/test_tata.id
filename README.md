@@ -13,7 +13,7 @@ Dokumen perencanaan: [PRD](docs/PRD.md) · [Tech Spec](docs/TECH_SPEC.md) · [Im
 Data assessment berasal dari tiga sumber yang sering tidak konsisten: project master (laporan PIC), update dari berbagai pihak, dan snapshot production system. Aplikasi ini:
 
 1. **Mengimpor** ketiga file apa adanya ke PostgreSQL (`manage.py ingest`).
-2. **Menghitung** metrik per project — progress menurut sistem, laju nyata vs laju yang dibutuhkan sampai deadline — lalu menjalankan **13 rule** deterministik yang menghasilkan *findings* (severity, penjelasan berangka, hal yang perlu diverifikasi, saran follow-up, evidence).
+2. **Menghitung** metrik per project — progress menurut sistem, laju nyata vs laju yang dibutuhkan sampai deadline — lalu menjalankan **14 rule** deterministik yang menghasilkan *findings* (severity, penjelasan berangka, hal yang perlu diverifikasi, saran follow-up, evidence).
 3. **Menyajikan** hasilnya lewat API JSON dan UI React berbahasa awam:
    - **Untuk orang awam:** pengantar "aplikasi apa ini" di atas halaman, panel *Cara membaca* (arti status, dua angka progress, cara hitung perkiraan, glosarium istilah), dan tombol "?" di label penting.
    - **Perlu tindakan hari ini** — di atas papan: project yang perlu diputuskan sekarang, masing-masing dengan alasan satu kalimat.
@@ -81,7 +81,7 @@ Vite meneruskan `/api/*` ke Django di port 8000, jadi kedua server harus berjala
 
 ```bash
 cd backend && source .venv/bin/activate
-python manage.py test monitor      # 47 test: unit rule engine + ingest dataset asli + API + bahasa awam
+python manage.py test monitor      # 49 test: unit rule engine + ingest dataset asli + API + bahasa awam
 cd ../frontend && npm run build    # smoke check frontend
 ```
 
@@ -129,7 +129,7 @@ DERIVED LAYER               ProjectMetrics · Finding(evidence jsonb)
 
 | Path | Isi |
 |---|---|
-| `backend/monitor/assess.py` | **Inti logika**: threshold, `compute_metrics`, 13 rule, `text_signals`, kalimat awam, perkiraan selesai. Tidak meng-import Django → bisa dites & dijelaskan terpisah. |
+| `backend/monitor/assess.py` | **Inti logika**: threshold, `compute_metrics`, 14 rule, `text_signals`, kalimat awam, perkiraan selesai. Tidak meng-import Django → bisa dites & dijelaskan terpisah. |
 | `backend/monitor/services.py` | Jembatan ORM ↔ `assess.py`: load raw, konversi waktu ke WIB, simpan derived, cetak ringkasan. |
 | `backend/monitor/management/commands/ingest.py` | Import CSV/JSON → raw layer. |
 | `backend/monitor/models.py` | Raw + derived models. |
@@ -163,7 +163,7 @@ DERIVED LAYER               ProjectMetrics · Finding(evidence jsonb)
 `ML → verified_quantity` (hanya VERIFIED) · `pages → pages_processed_total` · `boxes → processed_boxes` · `records → records_verified` · `endpoints → production_tested_endpoints`.
 
 **Rule** (detail & threshold di [Tech Spec §6](docs/TECH_SPEC.md#6-rule-engine)):
-`REPORTED_VS_OBSERVED`, `PCT_INCONSISTENT`, `PACE_RISK`, `ENV_NOT_READY`, `SCOPE_GAP`, `EQUIPMENT_DEGRADED`, `DATA_QUALITY_SKIP`, `STALE_REPORT`, `OVERDUE`, `POST_GO_LIVE_HEALTH`, `INSUFFICIENT_DATA`, dan meta-rule `DEADLINE_IMMINENT_BLOCKED`, `STATUS_CONTRADICTION`. Tingkat perhatian project = severity tertinggi dari findings-nya.
+`REPORTED_VS_OBSERVED`, `PCT_INCONSISTENT`, `PACE_RISK`, `ENV_NOT_READY`, `SCOPE_GAP`, `EQUIPMENT_DEGRADED`, `DATA_QUALITY_SKIP`, `STALE_REPORT`, `OVERDUE`, `POST_GO_LIVE_HEALTH`, `COMPLETION_NOT_SUPPORTED` (dilaporkan selesai padahal data sistem jauh di bawah target), `INSUFFICIENT_DATA`, dan meta-rule `DEADLINE_IMMINENT_BLOCKED`, `STATUS_CONTRADICTION`. Tingkat perhatian project = severity tertinggi dari findings-nya.
 
 ## 6. Key Engineering Decisions
 
@@ -171,7 +171,7 @@ DERIVED LAYER               ProjectMetrics · Finding(evidence jsonb)
 2. **"Dilaporkan" dan "menurut sistem" ditampilkan berdampingan, bukan digabung.** Selisihnya justru informasi utama. Jika angka master lebih baru dari snapshot sistem, selisih diberi label "belum terverifikasi sistem", bukan "salah".
 3. **Evidence-first.** Tidak ada finding tanpa pointer ke record sumber; test memastikan setiap `ref_id` ada di raw layer dan bisa ditemukan di timeline UI.
 4. **Raw dan derived dipisah.** Raw = apa yang dikatakan sumber; derived = interpretasi yang selalu bisa dibangun ulang ketika rule berubah.
-5. **`assess.py` bebas Django.** Logika inti dites tanpa database (29 unit test + fuzz test 500 project) dan bisa dibaca tanpa memahami framework.
+5. **`assess.py` bebas Django.** Logika inti dites tanpa database (31 unit test + fuzz test 500 project) dan bisa dibaca tanpa memahami framework.
 6. **Laju dihitung terhadap laju historis, bukan kapasitas yang diklaim PM.** Klaim kapasitas (PRJ-002: 4,500 hal/hari) hanya dipakai sebagai skenario terbaik: jika bahkan klaim itu tidak cukup → HIGH.
 7. **Sinyal teks tidak memengaruhi tingkat perhatian.** Pencocokan frasa ("hold", "error", "dicek kembali", …) membantu manusia menemukan update penting (mis. hold klasifikasi di PRJ-001) tanpa membuat sistem "menyimpulkan" dari teks bebas.
 8. **Stack: Django + PostgreSQL + Vite/React** — ORM, migration, management command, admin, dan test runner tersedia tanpa dependency tambahan; tanpa DRF karena hanya ada 2 endpoint GET.
@@ -221,7 +221,7 @@ DERIVED LAYER               ProjectMetrics · Finding(evidence jsonb)
 
 ## Status & Waktu Kerja
 
-Semua fase di [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) selesai: ingest, rule engine, 47 test backend, API, UI, dokumentasi. Fase 7–9 (bahasa awam, UX orang awam, tampilan dashboard) tidak ada di rencana awal; ditambahkan setelah review UI.
+Semua fase di [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) selesai: ingest, rule engine, 49 test backend, API, UI, dokumentasi. Fase 7–9 (bahasa awam, UX orang awam, tampilan dashboard) tidak ada di rencana awal; ditambahkan setelah review UI.
 
 **Waktu kerja aktual: ±3 jam 45 menit**, dari total rentang ±6 jam (Rabu, 7 Oktober 2026, 09.19–15.14 WIB). Pengerjaan dilakukan di sela pekerjaan lain.
 
