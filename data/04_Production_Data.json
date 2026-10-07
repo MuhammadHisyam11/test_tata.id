@@ -1,0 +1,145 @@
+{
+  "generated_at": "2026-10-06T17:00:00",
+  "records": [
+    {
+      "source_record_id": "DMS-ZETA-001",
+      "project_id": "PRJ-006",
+      "source_system": "dms_monitor",
+      "record_type": "system_status",
+      "timestamp": "2026-09-30T16:05:00",
+      "environment": "production",
+      "application_status": "ONLINE",
+      "deployment_status": "COMPLETED"
+    },
+    {
+      "source_record_id": "WH-GAMMA-001",
+      "project_id": "PRJ-003",
+      "source_system": "warehouse_entry",
+      "record_type": "production_snapshot",
+      "timestamp": "2026-09-30T17:00:00",
+      "processed_boxes": 1840,
+      "unit": "boxes"
+    },
+    {
+      "source_record_id": "PROD-ALPHA-001",
+      "project_id": "PRJ-001",
+      "source_system": "archive_production_report",
+      "record_type": "production_snapshot",
+      "timestamp": "2026-10-05T18:00:00",
+      "verified_quantity": 301.5,
+      "unit": "ML",
+      "workflow_state": "VERIFIED"
+    },
+    {
+      "source_record_id": "PROD-ALPHA-002",
+      "project_id": "PRJ-001",
+      "source_system": "archive_production_report",
+      "record_type": "production_snapshot",
+      "timestamp": "2026-10-05T18:00:00",
+      "pending_internal_check_quantity": 16.5,
+      "unit": "ML",
+      "workflow_state": "PENDING_INTERNAL_CHECK"
+    },
+    {
+      "source_record_id": "SCAN-BETA-001",
+      "project_id": "PRJ-002",
+      "source_system": "scanner_production_log",
+      "record_type": "production_snapshot",
+      "timestamp": "2026-10-05T23:59:00",
+      "pages_processed_total": 87240,
+      "unit": "pages"
+    },
+    {
+      "source_record_id": "VER-DELTA-001",
+      "project_id": "PRJ-004",
+      "source_system": "verification_application",
+      "record_type": "verification_snapshot",
+      "timestamp": "2026-10-06T07:00:00",
+      "records_verified": 45000,
+      "unit": "records"
+    },
+    {
+      "source_record_id": "VER-DELTA-002",
+      "project_id": "PRJ-004",
+      "source_system": "verification_application",
+      "record_type": "verification_quality_snapshot",
+      "timestamp": "2026-10-06T07:00:00",
+      "records_skipped_missing_region": 3200,
+      "unit": "records"
+    },
+    {
+      "source_record_id": "API-EPS-001",
+      "project_id": "PRJ-005",
+      "source_system": "api_monitor",
+      "record_type": "integration_snapshot",
+      "timestamp": "2026-10-06T07:30:00",
+      "developed_endpoints": 9,
+      "configured_endpoints": 9,
+      "production_tested_endpoints": 0,
+      "target_endpoints": 10
+    },
+    {
+      "source_record_id": "API-EPS-002",
+      "project_id": "PRJ-005",
+      "source_system": "api_monitor",
+      "record_type": "environment_check",
+      "timestamp": "2026-10-06T07:32:00",
+      "environment": "production",
+      "connection_status": "NOT_CONFIGURED",
+      "last_successful_connection": null
+    },
+    {
+      "source_record_id": "SCAN-BETA-002",
+      "project_id": "PRJ-002",
+      "source_system": "scanner_production_log",
+      "record_type": "scanner_status",
+      "timestamp": "2026-10-06T08:15:00",
+      "scanners": [
+        {
+          "scanner_id": "SCN-A",
+          "status": "RUNNING"
+        },
+        {
+          "scanner_id": "SCN-B",
+          "status": "OUT_OF_SERVICE"
+        },
+        {
+          "scanner_id": "SCN-C",
+          "status": "RUNNING"
+        }
+      ]
+    },
+    {
+      "source_record_id": "SCAN-BETA-003",
+      "project_id": "PRJ-002",
+      "source_system": "scanner_production_log",
+      "record_type": "scanner_status",
+      "timestamp": "2026-10-06T15:30:00",
+      "scanners": [
+        {
+          "scanner_id": "SCN-A",
+          "status": "RUNNING"
+        },
+        {
+          "scanner_id": "SCN-B",
+          "status": "LIMITED"
+        },
+        {
+          "scanner_id": "SCN-C",
+          "status": "RUNNING"
+        }
+      ]
+    },
+    {
+      "source_record_id": "DMS-ZETA-002",
+      "project_id": "PRJ-006",
+      "source_system": "dms_monitor",
+      "record_type": "usage_snapshot",
+      "timestamp": "2026-10-06T16:45:00",
+      "active_users_last_24h": 14,
+      "successful_logins_last_24h": 21,
+      "failed_logins_last_24h": 1,
+      "application_status": "ONLINE"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+update_id,project_id,timestamp,source_type,source_name,message
+UPD-001,PRJ-006,2026-09-29T14:00:00,TECHNICAL_TEAM,Tim Teknis,Implementasi aplikasi sudah selesai dan environment production sudah aktif. User utama sudah dapat mengakses sistem.
+UPD-002,PRJ-003,2026-09-29T15:20:00,PROJECT_MANAGER,Andi,Pekerjaan berjalan normal dan belum ada kendala signifikan yang dilaporkan tim.
+UPD-003,PRJ-006,2026-09-30T16:00:00,PROJECT_MANAGER,Maya,User training telah selesai dan aplikasi sudah digunakan. Tidak ada kendala teknis yang dilaporkan pada penutupan implementasi.
+UPD-004,PRJ-003,2026-09-30T17:00:00,PROJECT_MANAGER,Andi,Produksi dilanjutkan seperti biasa. Progress akan diperbarui kembali setelah rekap berikutnya.
+UPD-005,PRJ-001,2026-10-03T16:20:00,PROJECT_MANAGER,Raka,Produksi penataan berjalan sesuai rencana. Tim masih fokus menyelesaikan box pada area kerja yang sudah dibuka.
+UPD-006,PRJ-005,2026-10-04T14:05:00,TECHNICAL_TEAM,Tim Teknis,Development di sisi tata.id untuk 9 endpoint sudah selesai. Pengujian ke environment production customer belum dapat dilakukan karena credential dan production endpoint belum diterima.
+UPD-007,PRJ-004,2026-10-04T15:10:00,PROJECT_MANAGER,Sari,Tim verifikasi berjalan sesuai pembagian data. Belum ada kendala signifikan yang mempengaruhi aktivitas harian.
+UPD-008,PRJ-002,2026-10-04T17:15:00,PROJECT_MANAGER,Nadia,Produksi hari ini masih berjalan normal dengan tiga scanner. Rata-rata kapasitas tim sekitar 4.500 halaman per hari.
+UPD-009,PRJ-001,2026-10-05T10:15:00,FIELD_TEAM,Operator 1,Rekap tim hari ini mencatat 318 ML sudah selesai ditata. Sebagian hasil terbaru masih dalam proses pengecekan internal sebelum masuk rekap hasil yang sudah diverifikasi.
+UPD-010,PRJ-005,2026-10-05T10:30:00,ACCOUNT,Account Team,Sudah koordinasi kembali dengan PIC customer terkait credential dan production endpoint untuk kebutuhan testing.
+UPD-011,PRJ-004,2026-10-05T13:45:00,OPERATOR,Operator 1,"Di sebagian data sumber lama, field wilayah masih kosong. Data yang field wilayahnya kosong sementara dilewati agar verifikasi data lainnya tetap berjalan."
+UPD-012,PRJ-001,2026-10-05T14:40:00,FIELD_TEAM,Operator 1,Pada uji petik hari ini ada beberapa box yang diminta dicek kembali karena interpretasi klasifikasi berbeda dengan arsiparis customer.
+UPD-013,PRJ-002,2026-10-05T16:22:00,OPERATOR,Operator 1,Scanner A normal. Scanner B mengalami paper feeding error. Scanner C masih dapat digunakan untuk produksi.
+UPD-014,PRJ-006,2026-10-05T16:40:00,ACCOUNT,Account Team,Ada satu user yang sempat tidak bisa login setelah training. Password sudah di-reset dan user sudah berhasil login kembali.
+UPD-015,PRJ-004,2026-10-06T07:00:00,PROJECT_MANAGER,Sari,Verifikasi masih berjalan sesuai rencana. Tim melanjutkan batch berikutnya hari ini.
+UPD-016,PRJ-005,2026-10-06T07:30:00,PROJECT_MANAGER,Kevin,Sudah dilakukan follow up ke customer. Saat ini tim menunggu informasi akses production.
+UPD-017,PRJ-002,2026-10-06T08:10:00,PROJECT_MANAGER,Nadia,Scanner B masih belum dapat digunakan. Vendor sudah dihubungi untuk pengecekan. Produksi tetap berjalan menggunakan scanner yang tersedia.
+UPD-018,PRJ-002,2026-10-06T08:43:00,VENDOR,Vendor Scanner,Teknisi dijadwalkan datang siang ini untuk pengecekan unit. Estimasi pemulihan baru dapat diberikan setelah pemeriksaan.
+UPD-019,PRJ-001,2026-10-06T09:14:00,OPERATOR,Operator 2,Untuk sementara box dengan pola klasifikasi yang sama kami hold dulu sambil menunggu arahan supaya tidak menambah revisi.
+UPD-020,PRJ-001,2026-10-06T11:32:00,PROJECT_MANAGER,Raka,Sudah koordinasi dengan pihak customer terkait hasil uji petik dan perbedaan interpretasi klasifikasi.
+UPD-021,PRJ-002,2026-10-06T13:35:00,VENDOR,Vendor Scanner,"Pengecekan Scanner B sudah dilakukan. Unit dapat digunakan kembali, tetapi feeding masih perlu dipantau dan kecepatan belum kembali ke kondisi normal."
+UPD-022,PRJ-002,2026-10-06T15:20:00,OPERATOR,Operator 1,Scanner B sudah dipakai kembali untuk produksi terbatas. Scanner A dan C tetap berjalan normal.
+UPD-023,PRJ-004,2026-10-06T16:10:00,PROJECT_MANAGER,Sari,Target penyelesaian tetap mengacu pada jadwal project. Rekap kapasitas verifikasi harian per operator belum tersedia dalam laporan ini.
